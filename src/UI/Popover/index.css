@@ -1,0 +1,23 @@
+.sdw-popover__wrap {
+  position: absolute;
+  background: black;
+  opacity: 0.6;
+  color: rgb(255, 255, 255);
+  padding: 6px 20px;
+  border-radius: 4px;
+  transform: translateX(-50%) translateY(-100%);
+  z-index: 9999;
+}
+
+.sdw-popover__wrap::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background-color: #000;
+  transform: rotate(45deg);
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  margin-left: -4px;
+}

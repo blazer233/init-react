@@ -1,0 +1,155 @@
+.sdw-input__div-wrap {
+  display: inline-table;
+  position: relative;
+  margin-right: 38px;
+  vertical-align: bottom;
+}
+
+.sdw-input__wrap,
+.sdw-textarea-input__wrap {
+  border: 1px solid #eee;
+  border-radius: 4px;
+}
+
+.sdw-input__wrap:focus,
+.sdw-textarea-input__wrap {
+  outline: none;
+}
+
+.sdw-textarea-input__wrap {
+  padding: 10px 18px 0;
+  min-height: 60px;
+}
+
+.sdw-input__wrap {
+  padding: 0 22px 0 14px;
+}
+
+.sdw-input__wrap:disabled {
+  color: #ccc;
+  cursor: not-allowed;
+}
+
+/* type=number */
+/* .sdw-input__wrap[type=number] {
+	-moz-appearance: textfield; 
+}
+.sdw-input__wrap[type=number]::-webkit-inner-spin-button,
+.sdw-input__wrap[type=number]::-webkit-outer-spin-button {
+	-webkit-appearance: none;
+	margin: 0;
+} */
+
+.sdw-error-input {
+  border: 1px solid #ff5e5e;
+}
+
+.sdw-error-input__tip {
+  position: absolute;
+  color: #ff5e5e;
+  font-size: 12px;
+  background-color: #fff;
+  line-height: 14px;
+  width: calc(100% + 40px);
+  bottom: -16px;
+}
+
+.sdw-input-clearable {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  position: absolute;
+  /* 等视觉给好icon后调整位置 */
+  top: 12px;
+  right: 8px;
+  cursor: pointer;
+  background-image: url('./img/clear.png');
+}
+
+/* 鼠标聚焦边框颜色蓝起来 */
+.sdw-input__on-focus .operation-label-title,
+.sdw-input__on-focus .sdw-input__wrap,
+.sdw-input__on-focus .sdw-textarea-input__wrap {
+  border: 1px solid #265cf0;
+}
+
+.operation-label-title {
+  display: inline-block;
+  line-height: 40px;
+  height: 40px;
+  position: relative;
+  z-index: 1;
+  padding: 0 12px;
+  margin-right: -4px;
+  background: #fff;
+  border: 1px solid #eee;
+  font-size: 14px;
+  color: #262626;
+  border-radius: 4px 0 0 4px;
+  box-sizing: border-box;
+}
+
+.sdw-error-input__wrap .operation-label-title {
+  border: 1px solid #ff5e5e;
+}
+
+.sdw-nultiple-input-wrap {
+  display: inline-block;
+  border-radius: 4px;
+  width: calc(100% + 36px);
+  border: 1px solid #eee;
+}
+
+.sdw-input__multiple-choice-div-wrap {
+  width: calc(100% + 36px);
+  height: 120px;
+  overflow-y: auto;
+  position: absolute;
+  border: 1px solid #eee;
+  z-index: 9;
+  background-color: #fff;
+}
+
+.sdw-input__multiple-choice-item {
+  padding: 0 10px;
+  line-height: 36px;
+}
+
+.sdw-input__multiple-choice-item:hover {
+  background-color: #f5f7fa;
+}
+
+.sdw-input-tags.tag {
+  display: inline-block;
+  background-color: #f0f2f5;
+  color: #909399;
+  border-radius: 4px;
+  padding: 8px;
+  margin: 4px 0 4px 8px;
+  line-height: 14px;
+  border: 1px solid #eee;
+}
+
+.sdw-input-tags.search-input,
+.sdw-input-tags.search-input:hover {
+  border: none;
+  outline: none;
+}
+
+.sdw-input-tags__clear-icon {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  background: url(./img/cancel.png) no-repeat;
+  background-size: cover;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.sdw-input-tags:hover {
+  border: 1px solid #265cf0;
+}
+
+.sdw-input__multiple-choice-item.ellipsis {
+  max-width: 100%;
+}

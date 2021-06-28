@@ -1,0 +1,15 @@
+.monitor-eye-detail__user-img {
+  height: 16px;
+  vertical-align: text-top;
+  cursor: pointer;
+  margin-left: 8px;
+}
+.main {
+  display: flex;
+  width: 300px;
+  justify-content: flex-end;
+  flex-direction: row;
+}
+.input {
+  width: 300px;
+}

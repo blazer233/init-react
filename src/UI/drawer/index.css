@@ -1,0 +1,161 @@
+@keyframes changeBackgroundColor {
+  0% {
+    background: rgba(1, 1, 1, .01);
+  }
+  100% {
+    background: rgba(1, 1, 1, .5);
+  }
+}
+
+@keyframes hideBackgroundColor {
+  0% {
+    background: rgba(1, 1, 1, .5);
+  }
+  100% {
+    background: rgba(1, 1, 1, .01);
+  }
+}
+
+.sdw-drawer__wrap {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: rgba(1, 1, 1, .5);
+  animation: changeBackgroundColor .3s;
+  z-index: 1000; /* dataPicker 的z-index为1050，这里不能大于它 */
+}
+
+.sdw-drawer__wrap.is_hide_win {
+  background: transparent;
+  animation: hideBackgroundColor .3s;
+}
+
+@keyframes changeWidth {
+  0% {
+    width: 0;
+    min-width: 0;
+  }
+  100% {
+    width: 50%;
+    min-width: 920px;
+  }
+}
+
+@keyframes hideWin {
+  0% {
+    width: 50%;
+    min-width: 920px;
+  }
+  100% {
+    width: 0;
+    min-width: 0;
+  }
+}
+
+.sdw-drawer__wrap .sdw-drawer__content-wrap {
+  height: 100%;
+  width: 50%;
+  position: absolute;
+  right: 0;
+  top: 0;
+  background: #fff;
+  animation: changeWidth .3s;
+  min-width: 920px;
+}
+
+.sdw-drawer__content-wrap.is_hide_win {
+  width: 0;
+  animation: hideWin .3s;
+}
+
+.sdw-drawer__left-wrap {
+  height: 100%;
+  width: 50%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  background: transparent;
+}
+
+.sdw-drawer__content-header {
+  align-items: center;
+  color: #000;
+  display: flex;
+  font-weight: 600;
+  font-size: 18px;
+  padding: 20px 20px 20px 40px;
+  border-bottom: 1px solid #eee;
+  position: relative;
+}
+
+.sdw-drawer__content-header-cancel-img {
+  position: absolute;
+  right: 20px;
+  cursor: pointer;
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background: url(./img/cancel.png) no-repeat;
+  background-size: cover;
+}
+
+.sdw-drawer__content-header-cancel-img:hover {
+  background: url(./img/cancel_hover.png) no-repeat;
+  background-size: cover;
+}
+
+.sdw-drawer__content-body {
+  height: calc(100vh - 166px);
+  padding: 20px 20px 20px 40px;
+  overflow: auto;
+}
+
+.sdw-drawer__content-footer {
+  padding: 10px 20px;
+  border-top: 1px solid #eee;
+  text-align: right;
+}
+
+.sdw-drawer__content-footer > button {
+  display: inline-block;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  background: #FFF;
+  border: 1px solid #DCDFE6;
+  color: #666;
+  -webkit-appearance: none;
+  text-align: center;
+  box-sizing: border-box;
+  outline: 0;
+  margin: 0;
+  transition: .1s;
+  font-weight: 500;
+  padding: 12px 20px;
+  font-size: 14px;
+  border-radius: 4px;
+  margin-left: 8px;
+}
+
+.sdw-drawer__content-footer >
+button.sdw-drawer__content-footer-button--primary {
+  color: #FFF;
+  background-color: #265CF0;
+  border-color: #265CF0;
+}
+
+.sdw-drawer__content-footer >
+button.sdw-drawer__content-footer-button--primary:hover {
+  background: #517df3;
+  border-color: #517df3;
+  color: #FFF;
+}
+
+.sdw-drawer__content-footer >
+button.sdw-drawer__content-footer-button--cancel:hover {
+  color: #265CF0;
+  border-color: #becefb;
+  background-color: #e9effe;
+}
