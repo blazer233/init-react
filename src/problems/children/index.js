@@ -11,18 +11,7 @@ function Parent(props) {
       count:{count}
       {props.children}
     </div>
-  );
+  ); 
 }
 
-import React from "react";
-
-function App() {
-  return (
-    <div>
-      <input onInput={updateValue} value={value} />
-      <h2>Hello {value}</h2>
-      <hr />
-    </div>
-  );
-}
-export default App;
+export default Parent;

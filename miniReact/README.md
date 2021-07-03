@@ -6,13 +6,15 @@
 
 ![Alt](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/914cba218a7e415eafc5feddcf9454dc~tplv-k3u1fbpfcp-zoom-1.image)
 
-react 的理念是在于对大型项目的`快速响应`，对于新版的 react 16.8 而言更是带来的全新的理念`fiber`去解决网页快速响应时所伴随的问题，即 CPU 的瓶颈，传统网页浏览受制于浏览器刷新率、js 执行时间过长等因素会造成页面掉帧，甚至卡顿，而 react 由于自身的底层设计从而规避这一问题的发生，所以 react16.8 的面世对于前端领域只办三件事：快速响应、快速响应、还是 Tmd 快速响应 为什么说是从 0 到 0.1 实现一个 react ？因为我会从一个 html 出发，跟随新版 react 的 fiber 理念，仿一个非常基础的 react
+react 的理念是在于对大型项目的`快速响应`，对于新版的 react 16.8 而言更是带来的全新的理念`fiber`去解决网页快速响应时所伴随的问题，即 CPU 的瓶颈，传统网页浏览受制于浏览器刷新率、js 执行时间过长等因素会造成页面掉帧，甚至卡顿
+
+react 由于自身的底层设计从而规避这一问题的发生，所以 react16.8 的面世对于前端领域只办三件事：~~快速响应、快速响应、还是 Tmd 快速响应 ~~，这篇文章将会从一个 html 出发，跟随 react 的 fiber 理念，仿一个非常基础的 react
 
 ---
 
 ## 一开始的准备工作 🤖
 
-##### html
+### html
 
 我们需要一个 html 去撑起来整个页面，支撑 react 运行，页面中添加`<div id="root"></div>`，之后添加一个 script 标签，因为需要使用`import`进行模块化构建，所以需要为 script 添加 type 为`module`的属性
 
@@ -36,7 +38,7 @@ react 的理念是在于对大型项目的`快速响应`，对于新版的 react
 
 推荐安装一个 `Live Server` 插件，有助于我们对代码进行调试，接下来的操作也会用到
 
-##### JavaScript
+### JavaScript
 
 我们会仿写一个如下的 react，实现一个最最基础的 react 双向绑定，在 `<input/>` 绑定事件，将输入的值插入在 `<h2/>` 标签内：
 
@@ -71,13 +73,15 @@ React.createElement(
 ...
 ```
 
+> [在线地址](https://www.babeljs.cn/repl#?browsers=defaults%2C%20not%20ie%2011%2C%20not%20ie_mob%2011&build=&builtIns=false&corejs=3.6&spec=false&loose=false&code_lz=Q&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=false&fileSize=false&timeTravel=false&sourceType=module&lineWrap=true&presets=env%2Creact%2Cstage-2&prettier=false&targets=&version=7.14.7&externalPlugins=)
+
 从转换后的代码我们可以看出 React.createElement 支持多个参数:
 
-1. type，也就是节点类型
+1. type，节点类型
 
-2. config, 这是节点上的属性，比如 id 和 href
+2. config, 节点上的属性，比如 id 和 href
 
-3. children, 从第三个参数开始就全部是 children 也就是子元素了，子元素可以有多个，类型可以是简单的文本，也可以还是 React.createElement，如果是 React.createElement，其实就是子节点了，子节点下面还可以有子节点。这样就用 React.createElement 的嵌套关系实现了 HTML 节点的树形结构。
+3. children, 子元素了，子元素可以有多个，类型可以是简单的文本，也可以还是 React.createElement，如果是 React.createElement，其实就是子节点了，子节点下面还可以有子节点。这样就用 React.createElement 的嵌套关系实现了 HTML 节点的树形结构。
 
 我们可以按照 `React.createElement` 的形式仿写一个可以实现同样功能的 `createElement` 将 jsx 通过一种简单的数据结构展示出来即 `虚拟DOM` 这样在更新时，新旧节点的对比也可以转化为虚拟 DOM 的对比
 
@@ -98,6 +102,13 @@ React.createElement(
 - 当子组件是文本节点时，通过构造一种 type 为 `TEXT_ELEMENT` 的节点类型表示
 
 ```JavaScript
+/**
+ * 创建虚拟 DOM 结构
+ * @param {type} 标签名
+ * @param {props} 属性对象
+ * @param {children} 子节点
+ * @return {element} 虚拟 DOM
+ */
 const createElement = (type, props, ...children) => ({
   type,
   props: {
@@ -117,14 +128,14 @@ const createElement = (type, props, ...children) => ({
 });
 ```
 
-[源码实现](https://github.com/facebook/react/blob/60016c448bb7d19fc989acd05dda5aca2e124381/packages/react/src/ReactElement.js#L348)
+> [源码实现](https://github.com/facebook/react/blob/60016c448bb7d19fc989acd05dda5aca2e124381/packages/react/src/ReactElement.js#L348)
 
-实现 `createElement` 之后我们可以拿到虚拟 DOM，但是还需要 `render` 将代码渲染到页面，此时我们需要对 `index.js` 进行一下处理，添加输入事件，将 `createElement` 和 `render` 通过 import 进行引入，render 时传入被编译后的虚拟 DOM 和页面的根元素 `root`， 最后再进行函数调用，执行我们的 `类react` 最终渲染到页面
+实现 `createElement` 之后我们可以拿到虚拟 DOM，但是还需要 `render` 将代码渲染到页面，此时我们需要对 `index.js` 进行一下处理，添加输入事件，将 `createElement` 和 `render` 通过 import 进行引入，render 时传入被编译后的虚拟 DOM 和页面的根元素 `root`， 最后再进行`executeRender`调用，页面被渲染，在页面更新的时候再次调用`executeRender`进行更新渲染
 
 ```JavaScript
 import {createElement,render} from "./mini/index.js";
-const updateValue = e => startRender(e.target.value);
-const startRender = (value = "World") => {
+const updateValue = e => executeRender(e.target.value);
+const executeRender = (value = "World") => {
   const element = createElement(
     "div",
     null,
@@ -138,207 +149,236 @@ const startRender = (value = "World") => {
   render(element, document.getElementById("root"));
 };
 
-startRender();
+executeRender();
 ```
 
 ## render 的时候做了什么 🥔
 
-`render`可谓是 react 最神秘的方法之一，接下拉我们会详细看看`render`做了些什么，首先它接受两个参数：
+### 之前的版本
+
+`render` 函数帮助我们将 element 添加至真实节点中，接下拉我们会详细看看它做了些什么，首先它接受两个参数：
 
 > 1. 根组件，其实是一个 JSX 组件，也就是一个 createElement 返回的虚拟 DOM
 > 1. 父节点，也就是我们要将这个虚拟 DOM 渲染的位置
 
-```javascript
+在 react 16.8 之前，渲染的方法是通过一下几步进行的
 
-```
+1. 创建 element.type 类型的 dom 节点，并添加到 root 元素下（文本节点特殊处理）
+2. 将 element 的 props 添加到对应的 DOM 上，事件进行特殊处理，挂载到 document 上（react17 调整为挂在到 container 上）
+3. 将 element.children 循环添加至 dom 节点中；
 
-然后你可以将它作为一个常规组件去使用：
-
-```javascript
-<ErrorBoundary>
-  <MyWidget />
-</ErrorBoundary>
-```
-
-错误边界的工作方式类似于 JavaScript 的 `catch {}`，不同的地方在于错误边界只针对 `React` 组件。只有 `class` 组件才可以成为错误边界组件。大多数情况下, 你只需要声明一次错误边界组件, 并在整个应用中使用它，在使用时被包裹组件出现的错误或者`throw new Error()`抛出的异常都可以被错误边界组件捕获，并且显示出兜底 UI
-
----
-
-## 封装一个可配置的 ErrorBoundary 🚲
-
-了解了官网实现错误边界组件的方法，我们可以封装一个`ErrorBoundary`组件，造一个好用的轮子，而不是直接写死`return <h1>Something went wrong</h1>`，学习了`react-redux`原理后我们知道可以用高阶组件来包裹`react`组件，将`store`中的数据和方法全局注入，同理，我们也可以使用高阶组件包裹使其成为一个能够错误捕获的 react 组件
-
-#### 1️⃣ 创造一个可配置的 ErrorBoundary 类组件
-
-相比与官网的 `ErrorBoundary`，我们可以将日志上报的方法以及显示的 `UI` 通过接受传参的方式进行动态配置，对于传入的`UI`，我们可以设置以`react`组件的方式 或 是一个`React Element`进行接受，而且通过组件的话，我们可以传入参数，这样可以在兜底 UI 中拿到具体的错误信息
-
-- componentDidCatch() : 错误日志处理的钩子函数
-- static getDerivedStateFromError() : 它将抛出的错误作为参数，并返回一个值以更新 state
+拿到虚拟 dom 进行如上三步的递归调用，渲染出页面 类似于如下流程
 
 ```javascript
-class ErrorBoundary extends React.Component {
-  state = { error: false };
-  static getDerivedStateFromError(error) {
-    return { error };
+/**
+ * 将虚拟 DOM 添加至真实 DOM
+ * @param {element} 虚拟 DOM
+ * @param {container} 真实 DOM
+ */
+const render = (element, container) => {
+  let dom;
+  /*
+      处理节点（包括文本节点）
+  */
+  if (typeof element !== "object") {
+    dom = document.createTextNode(element);
+  } else {
+    dom = document.createElement(element.type);
   }
-  componentDidCatch(error, errorInfo) {
-    if (this.props.onError) {
-      //上报日志通过父组件注入的函数进行执行
-      this.props.onError(error, errorInfo.componentStack);
-    }
+  /*
+      处理属性（包括事件属性）
+  */
+  if (element.props) {
+    Object.keys(element.props)
+      .filter((key) => key != "children")
+      .forEach((item) => {
+        dom[item] = element.props[item];
+      });
+    Object.keys(element.props)
+      .filter((key) => key.startsWith("on"))
+      .forEach((name) => {
+        const eventType = name.toLowerCase().substring(2);
+        dom.addEventListener(eventType, nextProps[name]);
+      });
   }
-  render() {
-    const { fallback, FallbackComponent } = this.props;
-    const { error } = this.state;
-    if (error) {
-      const fallbackProps = { error };
-      //判断是否为React Element
-      if (React.isValidElement(fallback)) {
-        return fallback;
-      }
-      //组件方式传入
-      if (FallbackComponent) {
-        return <FallbackComponent {...fallbackProps} />;
-      }
-      throw new Error("ErrorBoundary 组件需要传入兜底UI");
-    }
-    return this.props.children;
+  if (
+    element.props &&
+    element.props.children &&
+    element.props.children.length
+  ) {
+    /*
+      循环添加到dom
+  */
+    element.props.children.forEach((child) => render(child, dom));
   }
-}
-```
-
-这样就可以对兜底`UI`显示和`错误日志`进行动态获取，使组件更加灵活，但是又有一个问题出现，有时候会遇到这种情况：服务器突然 503、502 了，前端获取不到响应，这时候某个组件报错了，但是过一会又正常了。比较好的方法是用户点一下被`ErrorBoundary`封装的组件中的一个方法来重新加载出错组件，不需要重刷页面，这时候需要兜底的组件中应该暴露出一个方法供`ErrorBoundary`进行处理
-
-![image-1](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/cb534b2ba8de4a0a85cbce8b837d4e19~tplv-k3u1fbpfcp-zoom-1.image)
-
-1. 在 ErrorBoundary 中添加方法，检测是否有注入重置方法，如果有重置方法就执行并且重置 state 中的 error，使其错误状态为 false
-
-```javascript
-resetErrorBoundary = () => {
-  if (this.props.onReset) this.props.onReset();
-  this.setState({ error: false });
+  container.appendChild(dom);
 };
 ```
 
-2. 在 render 中添加函数组件类型进行渲染，可以将重置的方法以及错误信息当做参数进行传递到当前组件进行处理
+### 之后的版本（fiber）
 
-```javascript
-  render() {
-    const { fallback, FallbackComponent, fallbackRender } = this.props;
-    const { error } = this.state;
-    if (error) {
-      const fallbackProps = {
-        error,
-        resetErrorBoundary: this.resetErrorBoundary,
+当我们写完如上的代码，会发现这个递归调用是有问题的
+
+如上这部分工作被 React 官方称为 renderer，renderer 是第三方可以自己实现的一个模块，还有个核心模块叫做 reconsiler，reconsiler 的一大功能就是 diff 算法，他会计算出应该更新哪些页面节点，然后将需要更新的节点虚拟 DOM 传递给 renderer，renderer 负责将这些节点渲染到页面上，但是但是他却是同步的，一旦开始渲染，就会将所有节点及其子节点全部渲染完成这个进程才会结束。
+
+React 的官方演讲中有个例子，可以很明显的看到这种同步计算造成的卡顿：
+
+![Alt](https://mmbiz.qpic.cn/mmbiz_gif/8mYHUg4p3qsuwtrhpG5ySTUFMb2lKeMncZmRcRFnwVUZPGM3NXDyUGSKR5Vqf5zcHZfDbWlYiahy3fC0ibLwiaNfA/640?wx_fmt=gif&tp=webp&wxfrom=5&wx_lazy=1)
+
+当 dom tree 很大的情况下，JS 线程的运行时间可能会比较长，在这段时间浏览器是不会响应其他事件的，因为 JS 线程和 GUI 线程是互斥的，JS 运行时页面就不会响应，这个时间太长了，用户就可能看到卡顿，
+
+此时我们可以分为两步解决这个问题
+
+- 允许中断渲染工作，如果有优先级更高的工作插入，则暂时中断浏览器渲染，待完成该工作后，恢复浏览器渲染；
+- 将渲染工作进行分解，分解成一个个小单元；
+
+#### 第一个方案，此时我们将引入一个新的 Api
+
+> [window.requestIdleCallback](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback) 将在浏览器的空闲时段内调用的函数排队。这使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件
+
+requestIdleCallback 接收一个回调，这个回调会在浏览器空闲时调用，每次调用会传入一个 IdleDeadline，可以拿到当前还空余多久， options 可以传入参数最多等多久，等到了时间浏览器还不空就强制执行了。
+
+（但是这个 API 还在实验中，兼容性不好，所以 React 官方自己实现了一套。本文会继续使用 requestIdleCallback 来进行任务调度）
+
+```JavaScript
+// 下一个工作单元
+let nextUnitOfWork = null
+/**
+ * workLoop 工作循环函数
+ * @param {deadline} 截止时间
+ */
+function workLoop(deadline) {
+  // 是否应该停止工作循环函数
+  let shouldYield = false
+
+  // 如果存在下一个工作单元，且没有优先级更高的其他工作时，循环执行
+  while (nextUnitOfWork && !shouldYield) {
+    nextUnitOfWork = performUnitOfWork(
+      nextUnitOfWork
+    )
+
+    // 如果截止时间快到了，停止工作循环函数
+    shouldYield = deadline.timeRemaining() < 1
+  }
+
+  // 通知浏览器，空闲时间应该执行 workLoop
+  requestIdleCallback(workLoop)
+}
+// 通知浏览器，空闲时间应该执行 workLoop
+requestIdleCallback(workLoop)
+
+// 执行单元事件，并返回下一个单元事件
+function performUnitOfWork(nextUnitOfWork) {
+  // TODO
+}
+
+```
+
+#### 第二个方案，此时我们将创建 fiber 的数据结构
+
+Fiber 之前的数据结构是一棵树，父节点的 children 指向了子节点，但是只有这一个指针是不能实现中断继续的。比如我现在有一个父节点 A，A 有三个子节点 B,C,D，当我遍历到 C 的时候中断了，重新开始的时候，其实我是不知道 C 下面该执行哪个的，因为只知道 C，并没有指针指向他的父节点，也没有指针指向他的兄弟。
+
+Fiber 就是改造了这样一个结构，加上了指向父节点和兄弟节点的指针：
+
+- child 指向子组件
+- sibling 指向兄弟组件
+- return 指向父组件
+
+## ![Alt](https://upload-images.jianshu.io/upload_images/9369683-699b6c3475685cdd.png?imageMogr2/auto-orient/strip|imageView2/2/w/813/format/webp)
+
+每个 fiber 都有一个链接指向它的第一个子节点、下一个兄弟节点和它的父节点。这种数据结构可以让我们更方便的查找下一个工作单元，fiber 的渲染顺序也如下步骤
+
+1. 从 root 开始，找到第一个子节点 A；
+2. 找到 A 的第一个子节点 B
+3. 找到 B 的第一个子节点 E
+4. 找 E 的第一个子节点，如无子节点，则找下一个兄弟节点，找到 E 的兄弟节点 F
+5. 找 F 的第一个子节点，如无子节点，也无兄弟节点，则找它的父节点的下一个兄弟节点，找到 F 的 父节点的兄弟节点 C；
+6. 找 C 的第一个子节点，找不到，找兄弟节点，D
+7. 找 D 的第一个子节点，G
+8. 找 G 的第一个子节点，找不到，找兄弟节点，找不到，找父节点 D 的兄弟节点，也找不到，继续找 D 的父节点的兄弟节点，找到 root；
+9. 上一步已经找到了 root 节点，渲染已全部完成。
+
+我们通过这个数据结构实现一个 fiber
+
+```JavaScript
+ wipRoot = {
+  dom: container,
+  props: { children: [element] },
+};
+performUnitOfWork(wipRoot);
+//随后调用`performUnitOfWork`自上而下构造整个 fiber 树
+
+/**
+ * performUnitOfWork用来执行任务
+ * @param {fiber} 我们的当前fiber任务
+ * @return {fiber} 下一个任务fiber任务
+ */
+const  performUnitOfWork = fiber => {
+  if (!fiber.dom) fiber.dom = createDom(fiber); // 创建一个DOM挂载上去
+  const elements = fiber.props.children; //当前元素下的所有同级节点
+  // 如果有父节点，将当前节点挂载到父节点上
+  if (fiber.return) {
+    fiber.return.dom.appendChild(fiber.dom);
+  }
+
+  let prevSibling = null;
+  /*
+      之后代码中我们将把此处的逻辑进行抽离
+  */
+  if (elements && elements.length) {
+    elements.forEach((element, index) => {
+      const newFiber = {
+        type: element.type,
+        props: element.props,
+        return: fiber,
+        dom: null,
       };
-      ...
-      if (typeof fallbackRender === "function")return fallbackRender(fallbackProps);
-      ...
-    }
-    return this.props.children;
+      // 父级的child指向第一个子元素
+      if (index === 0) {
+        fiber.child = newFiber;
+      } else {
+        // 每个子元素拥有指向下一个子元素的指针
+        prevSibling.sibling = newFiber;
+      }
+      prevSibling = fiber;
+    });
   }
-```
-
-#### 2️⃣ 将 ErrorBoundary 通过高阶函数进行包裹返回
-
-```javascript
-import React from "react";
-import DefaultErrorBoundary from "./core";
-const catchreacterror = (Boundary = DefaultErrorBoundary) => InnerComponent => {
-  return props => (
-    <Boundary {...props}>
-      <InnerComponent {...props} />
-    </Boundary>
-  );
-};
-```
-
----
-
-## 使用&测试 🏁
-
-通过一个点击自增的 Demo，当数字到达某值，抛出异常，这里分别对 class 组件和 Function 组件作为发起异常的组件进行测试
-
-- 发起异常的组件
-
-```javascript
-//Function组件
-const fnCount1 = ({ count }) => {
-  if (count == 3) throw new Error("count is three");
-  return <span>{count}</span>;
-};
-//Class组件
-class fnCount2 extends React.Component {
-  render() {
-    const { count } = this.props;
-    if (count == 2) throw new Error("count is two");
-    return <span>{count}</span>;
+  // 先找子元素，没有子元素了就找兄弟元素
+  // 兄弟元素也没有了就返回父元素
+  // 最后到根节点结束
+  // 这个遍历的顺序其实就是从上到下，从左到右
+  if (fiber.child) {
+    return fiber.child;
+  } else {
+    let nextFiber = fiber;
+    while (nextFiber) {
+      if (nextFiber.sibling) {
+        return nextFiber.sibling;
+      }
+      nextFiber = nextFiber.return;
+    }
   }
 }
 ```
 
-- 处理错误异常的函数组件
+### 之后的版本（commit）
 
-```javascript
-const errorbackfn = ({ error: { message }, resetErrorBoundary }) => (
-  <div>
-    <p>出错啦</p>
-    <pre>{message}</pre>
-    <button onClick={resetErrorBoundary}>Try again</button>
-  </div>
-);
+上面我们的 performUnitOfWork 一边构建 Fiber 结构一边操作 DOM appendChild，这样如果某次更新好几个节点，操作了第一个节点之后就中断了，那我们可能只看到第一个节点渲染到了页面，后续几个节点等浏览器空了才陆续渲染。为了避免这种情况，我们应该将 DOM 操作都搜集起来，最后统一执行，这就是 commit。当没有下一次的工作单元时 commit:
+
+```JavaScript
+function workLoop(deadline) {
+  let shouldYield = false;
+  while (nextUnitOfWork && !shouldYield) {
+    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+    shouldYield = deadline.timeRemaining() < 1;
+  }
+  if (!nextUnitOfWork && wipRoot) {
+    commitRoot();
+  }
+  requestIdleCallback(workLoop);
+}
+
 ```
-
-- 处理错误异常的普通组件
-
-```javascript
-const errorbackcom = () => <h1>出错啦,不可撤销</h1>;
-```
-
-- 测试组件
-
-```javascript
-//对发起异常的组件进行包裹处理，返回一个可以处理错误编辑的高阶组件
-const SafeCount1 = catchreacterror()(fnCount1);
-const SafeCount2 = catchreacterror()(fnCount2);
-
-//测试主组件
-const App = () => {
-  const [count, setCount] = useState(0);
-  const ListenError = (arg, info) => console.log("出错了:" + arg.message, info); //错误时进行的回调
-  const onReset = () => setCount(0); //点击重置时进行的回调
-  return (
-    <div className="App">
-      <section>
-        <button onClick={() => setCount(count => count + 1)}>+</button>
-        <button onClick={() => setCount(count => count - 1)}>-</button>
-      </section>
-      <hr />
-      <div>
-        Class componnet:
-        <SafeCount2
-          count={count}
-          fallbackRender={errorbackfn}
-          onReset={onReset}
-          onError={ListenError}
-        />
-      </div>
-      <div>
-        Function componnet:
-        <SafeCount1
-          count={count}
-          FallbackComponent={errorbackcom}
-          onError={ListenError}
-        />
-      </div>
-    </div>
-  );
-};
-```
-
-![demo-1](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/b73110b411344b8a8c7cb7b8d3e2b6d2~tplv-k3u1fbpfcp-zoom-1.image)
-
-大功告成！
 
 ## 遇到的问题&总结 💢
 

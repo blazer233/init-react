@@ -1,5 +1,5 @@
 import React from "./mini/index.js";
-const updateValue = e => rerender(e.target.value);
+const updateValue = (e) => rerender(e.target.value);
 const rerender = (value = "World") => {
   const element = React.createElement(
     "div",
@@ -15,9 +15,3 @@ const rerender = (value = "World") => {
 };
 
 rerender();
-
-/**
- * https://mp.weixin.qq.com/s/wGSUdQJxOiyPTRbrBBs1Zg
- * https://react.iamkasong.com/preparation/idea.html#cpu%E7%9A%84%E7%93%B6%E9%A2%88
- * https://react.docschina.org/
- */
