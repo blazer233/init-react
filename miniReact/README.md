@@ -306,8 +306,11 @@ Fiber 就是改造了这样一个结构，加上了指向父节点和兄弟节�
   props: { children: [element] },
 };
 performUnitOfWork(wipRoot);
-//随后调用`performUnitOfWork`自上而下构造整个 fiber 树
+```
 
+随后调用`performUnitOfWork`自上而下构造整个 fiber 树
+
+```JavaScript
 /**
  * performUnitOfWork用来执行任务
  * @param {fiber} 我们的当前fiber任务
@@ -346,7 +349,7 @@ const  performUnitOfWork = fiber => {
   // 先找子元素，没有子元素了就找兄弟元素
   // 兄弟元素也没有了就返回父元素
   // 最后到根节点结束
-  // 这个遍历的顺序其实就是从上到下，从左到右
+  // 这个遍历的顺序是从上到下，从左到右
   if (fiber.child) {
     return fiber.child;
   } else {
@@ -361,48 +364,250 @@ const  performUnitOfWork = fiber => {
 }
 ```
 
-### 之后的版本（commit）
+### 之后的版本（reconcile）
 
-上面我们的 performUnitOfWork 一边构建 Fiber 结构一边操作 DOM appendChild，这样如果某次更新好几个节点，操作了第一个节点之后就中断了，那我们可能只看到第一个节点渲染到了页面，后续几个节点等浏览器空了才陆续渲染。为了避免这种情况，我们应该将 DOM 操作都搜集起来，最后统一执行，这就是 commit。当没有下一次的工作单元时 commit:
+#### currentRoot
+
+reconcile 其实就是虚拟 DOM 树的 diff 操作，将更新前的 fiber tree 和更新后的 fiber tree 进行比较，得到比较结果后，仅对有变化的 fiber 对应的 dom 节点进行更新。
+
+- 删除不需要的节点
+- 更新修改过的节点
+- 添加新的节点
+
+新增 currentRoot 变量，保存根节点更新前的 fiber tree，为 fiber 新增 alternate 属性，保存 fiber 更新前的 fiber tree
 
 ```JavaScript
-function workLoop(deadline) {
-  let shouldYield = false;
-  while (nextUnitOfWork && !shouldYield) {
-    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
-    shouldYield = deadline.timeRemaining() < 1;
-  }
-  if (!nextUnitOfWork && wipRoot) {
-    commitRoot();
-  }
-  requestIdleCallback(workLoop);
+let currentRoot = null
+function render (element, container) {
+    wipRoot = {
+        // 省略
+        alternate: currentRoot
+    }
+}
+function commitRoot () {
+    commitWork(wipRoot.child)
+    /*
+        更改fiber树的指向，将缓存中的fiber树替换到页面中的fiber tree
+    */
+    currentRoot = wipRoot
+    wipRoot = null
 }
 
 ```
 
-## 遇到的问题&总结 💢
+1. 如果新老节点类型一样，复用老节点 DOM，更新 props
 
-有很多时候 react 错误边界不是万能的比如
+2. 如果类型不一样，而且新的节点存在，创建新节点替换老节点
 
-- 事件错误
+如果类型不一样，没有新节点，有老节点，删除老节点
 
-![demo-1](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f097a4fd654a48e5a29a889462e89065~tplv-k3u1fbpfcp-zoom-1.image)
-上面 this.o 不存在，会报错，window.onerror 可以捕获，但是错误边界捕获不到。
+#### reconcileChildren
 
-- 异步代码
+1. 将 performUnitOfWork 中关于新建 fiber 的逻辑，抽离到 reconcileChildren 函数
+2. 在 reconcileChildren 中对比新旧 fiber；
 
-![demo-1](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d5641266e60f4a139605862e322a9cc8~tplv-k3u1fbpfcp-zoom-1.image)
+在对比 fiber tree 时
 
-- 服务端渲染 和 错误边界自己的错误
+- 当新旧 fiber 类型相同时 保留 dom，`仅更新 props，设置 effectTag 为 UPDATE`；
+- 当新旧 fiber 类型不同，且有新元素时 `创建一个新的 dom 节点，设置 effectTag 为 PLACEMENT`；
+- 当新旧 fiber 类型不同，且有旧 fiber 时 `删除旧 fiber，设置 effectTag 为 DELETION`
+
+```JavaScript
+/**
+ * 协调子节点
+ * @param {fiber} fiber
+ * @param {elements} fiber 的 子节点
+ */
+function reconcileChildren(wipFiber, elements) {
+  let index = 0;// 用于统计子节点的索引值
+  let oldFiber = wipFiber.alternate && wipFiber.alternate.child; //更新时才会产生
+  let prevSibling;// 上一个兄弟节点
+  while (index < elements.length || oldFiber) {
+    /**
+     * 遍历子节点
+     * oldFiber判断是更新触发还是首次触发,更新触发时为元素下所有节点
+     */
+    let newFiber;
+    const element = elements[index];
+    const sameType = oldFiber && element && element.type == oldFiber.type; // fiber 类型是否相同点
+    /**
+     * 更新时
+     * 同标签不同属性，更新属性
+     */
+    if (sameType) {
+      newFiber = {
+        type: oldFiber.type,
+        props: element.props, //只更新属性
+        dom: oldFiber.dom,
+        parent: wipFiber,
+        alternate: oldFiber,
+        effectTag: "UPDATE",
+      };
+    }
+    /**
+     * 不同标签，即替换了标签 or 创建新标签
+     */
+    if (element && !sameType) {
+      newFiber = {
+        type: element.type,
+        props: element.props,
+        dom: null,
+        parent: wipFiber,
+        alternate: null,
+        effectTag: "PLACEMENT",
+      };
+    }
+    /**
+     * 节点被删除了
+     */
+    if (oldFiber && !sameType) {
+      oldFiber.effectTag = "DELETION";
+      deletions.push(oldFiber);
+    }
+
+    if (oldFiber) oldFiber = oldFiber.sibling;
+    // 父级的child指向第一个子元素
+    if (index === 0) {
+      // fiber的第一个子节点是它的子节点
+      wipFiber.child = newFiber;
+    } else {
+      // fiber 的其他子节点，是它第一个子节点的兄弟节点
+      prevSibling.sibling = newFiber;
+    }
+    // 把新建的 newFiber 赋值给 prevSibling，这样就方便为 newFiber 添加兄弟节点了
+    prevSibling = newFiber;
+    //  索引值 + 1
+    index++;
+  }
+}
+```
+
+在 commit 时，根据 fiber 节点上`effectTag`的属性执行不同的渲染操作
+
+### 之后的版本（commit）
+
+在 commitWork 中对 fiber 的 effectTag 进行判断，处理真正的 DOM 操作。
+
+1. 当 fiber 的 effectTag 为 PLACEMENT 时，表示是新增 fiber，将该节点新增至父节点中。
+2. 当 fiber 的 effectTag 为 DELETION 时，表示是删除 fiber，将父节点的该节点删除。
+3. 当 fiber 的 effectTag 为 UPDATE 时，表示是更新 fiber，更新 props 属性。
+
+```JavaScript
+/**
+ * @param {fiber} fiber 结构的虚拟dom
+ */
+function commitWork(fiber) {
+  if (!fiber) return;
+  const domParent = fiber.parent.dom;
+  if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
+    domParent.appendChild(fiber.dom);
+  } else if (fiber.effectTag === "UPDATE" && fiber.dom != null) {
+    updateDom(fiber.dom, fiber.alternate.props, fiber.props);
+  } else if (fiber.effectTag === "DELETION") {
+    domParent.removeChild(fiber.dom);
+  }
+
+  // 递归操作子元素和兄弟元素
+  commitWork(fiber.child);
+  commitWork(fiber.sibling);
+}
+```
+
+此时我们着重来看`updateDom`发生了什么，我们拿到 dom 上被改变的新旧属性，进行操作
+
+```JavaScript
+/*
+    isEvent :拿到事件属性
+    isProperty :拿到非节点、非事件属性
+    isNew :拿到前后改变的属性
+*/
+const isEvent = key => key.startsWith("on");
+const isProperty = key => key !== "children" && !isEvent(key);
+const isNew = (prev, next) => key => prev[key] !== next[key];
+
+
+/**
+ * 更新dom属性
+ * @param {dom} fiber dom
+ * @param {prevProps} fiber dom上旧的属性
+ * @param {nextProps} fiber dom上新的属性
+ */
+function updateDom(dom, prevProps, nextProps) {
+  /**
+   * 便利旧属性
+   * 1、拿到on开头的事件属性
+   * 2、拿到被删除的事件
+   * 3、已删除的事件取消监听
+   */
+  Object.keys(prevProps)
+    .filter(isEvent)
+    .filter(key => !(key in nextProps))
+    .forEach(name => {
+      const eventType = name.toLowerCase().substring(2);
+      dom.removeEventListener(eventType, prevProps[name]);
+    });
+
+  /**
+   * 便利旧属性
+   * 1、拿到非事件属性和非子节点的属性
+   * 2、拿到被删除的属性
+   * 3、删除属性
+   */
+  Object.keys(prevProps)
+    .filter(isProperty)
+    .filter(key => !(key in nextProps))
+    .forEach(key => delete dom[key]);
+
+  /**
+   * 便利新属性
+   * 1、拿到非事件属性和非子节点的属性
+   * 2、拿到前后改变的属性
+   * 3、添加属性
+   */
+  Object.keys(nextProps)
+    .filter(isProperty)
+    .filter(isNew(prevProps, nextProps))
+    .forEach(name => {
+      dom[name] = nextProps[name];
+    });
+
+  /**
+   * 便利新属性
+   * 1、拿到on开头的事件属性
+   * 2、拿到前后改变的事件属性
+   * 3、为新增的事件属性添加监听
+   */
+  Object.keys(nextProps)
+    .filter(isEvent)
+    .filter(isNew(prevProps, nextProps))
+    .forEach(name => {
+      const eventType = name.toLowerCase().substring(2);
+      dom.addEventListener(eventType, nextProps[name]);
+    });
+}
+```
+
+完成了一系列对 dom 的操作，我们将新改变的 dom 渲染到页面
+
+大功告成！
+
+完整代码可以看我 GitHub。
+
+## 问题与总结 💢
 
 总结
 
-- 抽离组件 ✔
-- 错误反馈 ✔
-- UI 抽离 ✔
-- 错误重置 ✔
-- 抽离 hook 模式 ✖
-- 服务端 ✖
+- 我们写的 JSX 代码被 babel 转化成了 React.createElement。✔
+- React.createElement 返回的其实就是虚拟 DOM 结构。✔
+- 虚拟 DOM 的调和和渲染可以简单粗暴的递归，但是这个过程是同步的，如果需要处理的节点过多，可能会阻塞用户输入和动画播放，造成卡顿。✔
+- Fiber 是 16.x 引入的新特性，用处是将同步的调和变成异步的。✔
+- Fiber 改造了虚拟 DOM 的结构，具有 父->第一个子， 子->兄， 子->父这几个指针，有了这几个指针，可以从任意一个 Fiber 节点找到其他节点。✔
+- Fiber 将整棵树的同步任务拆分成了每个节点可以单独执行的异步执行结构。✔
+- Fiber 可以从任意一个节点开始遍历，遍历是深度优先遍历，顺序是 父->子->兄->父，也就是从上往下，从左往右。✔
+- Fiber 的调和阶段可以是异步的小任务，但是提交阶段( commit)必须是同步的。因为异步的 commit 可能让用户看到节点一个一个接连出现，体验不好。✔
+- react hook 实现 ✖
+- react 合成事件 ✖
+- ...
 
 至此，谢谢各位在百忙之中点开这篇文章，希望对你们能有所帮助，相信你对 react 中的错误边界有了大概的认实，也会编写一个简单的`ErrorBoundary`总的来说优化的点还有很多，如有问题欢迎各位大佬指正。
 
