@@ -1,6 +1,6 @@
 ## 前言 📝
 
-> 👉 我们认为，React 是用 JavaScript 构建快速响应的大型 Web 应用程序的首选方式。它在 Facebook 和 Instagram 上表现优秀。[官网地址](https://react.docschina.org/)。 👈
+> 👉 我们认为，React 是用 JavaScript 构建快速响应的大型 Web 应用程序的首选方式。它在 Facebook 和 Instagram 上表现优秀。[官网地址](https://react.docschina.org/)
 
 ![Alt](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5506b312f4ae415a89f10860c7e98bd8~tplv-k3u1fbpfcp-zoom-1.image)
 
