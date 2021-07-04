@@ -1,14 +1,12 @@
-# 从 html 实现一个 react🎅
-
 ## 前言 📝
 
 > 👉 我们认为，React 是用 JavaScript 构建快速响应的大型 Web 应用程序的首选方式。它在 Facebook 和 Instagram 上表现优秀。[官网地址](https://react.docschina.org/)。 👈
 
-![Alt](https://pic1.zhimg.com/v2-c52038dc36bf4d404dbdbc7ef0db5d69_1440w.jpg?source=172ae18b)
+![Alt](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/5506b312f4ae415a89f10860c7e98bd8~tplv-k3u1fbpfcp-zoom-1.image)
 
 react 的理念是在于对大型项目的`快速响应`，对于新版的 react 16.8 而言更是带来的全新的理念`fiber`去解决网页快速响应时所伴随的问题，即 CPU 的瓶颈，传统网页浏览受制于浏览器刷新率、js 执行时间过长等因素会造成页面掉帧，甚至卡顿
 
-react 由于自身的底层设计从而规避这一问题的发生，所以 react16.8 的面世对于前端领域只办三件事：~~快速响应、快速响应、还是 Tmd 快速响应 ~~，这篇文章将会从一个 html 出发，跟随 react 的 fiber 理念，仿一个非常基础的 react
+react 由于自身的底层设计从而规避这一问题的发生，所以 react16.8 的面世对于前端领域只办三件事：快速响应、快速响应、还是 Tmd 快速响应 !，这篇文章将会从一个 html 出发，跟随 react 的 fiber 理念，仿一个非常基础的 react
 
 ---
 
@@ -40,7 +38,7 @@ react 由于自身的底层设计从而规避这一问题的发生，所以 reac
 
 ### JavaScript
 
-我们会仿写一个如下的 react，实现一个最最基础的 react 双向绑定，在 `<input/>` 绑定事件，将输入的值插入在 `<h2/>` 标签内：
+我们会仿写一个如下的 react，实现一个基础的操作，在 `<input/>` 绑定事件，将输入的值插入在 `<h2/>` 标签内：
 
 ```JavaScript
 ...
@@ -55,6 +53,8 @@ function App() {
 }
 ...
 ```
+
+![actionGif.gif](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0b299a5b1f494b84874588013d12d6ca~tplv-k3u1fbpfcp-watermark.image)
 
 在 react 进行 babel 编译的时候，会将 `JSX` 语法转化为 `React.createElement()` 的形式，如上被 retuen 的代码就会被转换成
 
@@ -95,7 +95,7 @@ React.createElement(
 }
 ```
 
-实现：
+这里我们可以写一个函数实现下列需求
 
 - 原则是将所有的参数返回到一个对象上
 - children 也要放到 props 里面去，这样我们在组件里面就能通过 props.children 拿到子元素
@@ -128,9 +128,9 @@ const createElement = (type, props, ...children) => ({
 });
 ```
 
-> [源码实现](https://github.com/facebook/react/blob/60016c448bb7d19fc989acd05dda5aca2e124381/packages/react/src/ReactElement.js#L348)
+> [react 中 createElement 源码实现](https://github.com/facebook/react/blob/60016c448bb7d19fc989acd05dda5aca2e124381/packages/react/src/ReactElement.js#L348)
 
-实现 `createElement` 之后我们可以拿到虚拟 DOM，但是还需要 `render` 将代码渲染到页面，此时我们需要对 `index.js` 进行一下处理，添加输入事件，将 `createElement` 和 `render` 通过 import 进行引入，render 时传入被编译后的虚拟 DOM 和页面的根元素 `root`， 最后再进行`executeRender`调用，页面被渲染，在页面更新的时候再次调用`executeRender`进行更新渲染
+实现 `createElement` 之后我们可以拿到虚拟 DOM，但是还需要 `render` 将代码渲染到页面，此时我们需要对 `index.js` 进行处理，添加输入事件，将 `createElement` 和 `render` 通过 import 进行引入，render 时传入被编译后的虚拟 DOM 和页面的根元素 `root`， 最后再进行`executeRender`调用，页面被渲染，在页面更新的时候再次调用`executeRender`进行更新渲染
 
 ```JavaScript
 import {createElement,render} from "./mini/index.js";
@@ -156,7 +156,7 @@ executeRender();
 
 ### 之前的版本
 
-`render` 函数帮助我们将 element 添加至真实节点中，接下拉我们会详细看看它做了些什么，首先它接受两个参数：
+`render` 函数帮助我们将 element 添加至真实节点中，首先它接受两个参数：
 
 > 1. 根组件，其实是一个 JSX 组件，也就是一个 createElement 返回的虚拟 DOM
 > 1. 父节点，也就是我们要将这个虚拟 DOM 渲染的位置
@@ -223,7 +223,7 @@ const render = (element, container) => {
 
 React 的官方演讲中有个例子，可以很明显的看到这种同步计算造成的卡顿：
 
-![Alt](https://mmbiz.qpic.cn/mmbiz_gif/8mYHUg4p3qsuwtrhpG5ySTUFMb2lKeMncZmRcRFnwVUZPGM3NXDyUGSKR5Vqf5zcHZfDbWlYiahy3fC0ibLwiaNfA/640?wx_fmt=gif&tp=webp&wxfrom=5&wx_lazy=1)
+![Alt](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/05322d7da1dc48c0a40be7bf7770e25d~tplv-k3u1fbpfcp-zoom-1.image)
 
 当 dom tree 很大的情况下，JS 线程的运行时间可能会比较长，在这段时间浏览器是不会响应其他事件的，因为 JS 线程和 GUI 线程是互斥的，JS 运行时页面就不会响应，这个时间太长了，用户就可能看到卡顿，
 
@@ -234,11 +234,11 @@ React 的官方演讲中有个例子，可以很明显的看到这种同步计�
 
 #### 第一个方案，此时我们将引入一个新的 Api
 
-> [window.requestIdleCallback](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback) 将在浏览器的空闲时段内调用的函数排队。这使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件
-
 requestIdleCallback 接收一个回调，这个回调会在浏览器空闲时调用，每次调用会传入一个 IdleDeadline，可以拿到当前还空余多久， options 可以传入参数最多等多久，等到了时间浏览器还不空就强制执行了。
 
-（但是这个 API 还在实验中，兼容性不好，所以 React 官方自己实现了一套。本文会继续使用 requestIdleCallback 来进行任务调度）
+> [window.requestIdleCallback](https://developer.mozilla.org/zh-CN/docs/Web/API/Window/requestIdleCallback) 将在浏览器的空闲时段内调用的函数排队。这使开发者能够在主事件循环上执行后台和低优先级工作，而不会影响延迟关键事件
+>
+> > 但是这个 API 还在实验中，兼容性不好，所以 React 官方自己实现了一套。本文会继续使用 requestIdleCallback 来进行任务调度
 
 ```JavaScript
 // 下一个工作单元
@@ -284,9 +284,9 @@ Fiber 就是改造了这样一个结构，加上了指向父节点和兄弟节�
 - sibling 指向兄弟组件
 - return 指向父组件
 
-## ![Alt](https://upload-images.jianshu.io/upload_images/9369683-699b6c3475685cdd.png?imageMogr2/auto-orient/strip|imageView2/2/w/813/format/webp)
+## ![Alt](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/782ce851ab8a49e79ce56a287233d8a3~tplv-k3u1fbpfcp-zoom-1.image)
 
-每个 fiber 都有一个链接指向它的第一个子节点、下一个兄弟节点和它的父节点。这种数据结构可以让我们更方便的查找下一个工作单元，fiber 的渲染顺序也如下步骤
+每个 fiber 都有一个链接指向它的第一个子节点、下一个兄弟节点和它的父节点。这种数据结构可以让我们更方便的查找下一个工作单元，假定 `A` 是挂在 root 上的节点 fiber 的渲染顺序也如下步骤
 
 1. 从 root 开始，找到第一个子节点 A；
 2. 找到 A 的第一个子节点 B
@@ -301,6 +301,7 @@ Fiber 就是改造了这样一个结构，加上了指向父节点和兄弟节�
 我们通过这个数据结构实现一个 fiber
 
 ```JavaScript
+//创建最初的根fiber
  wipRoot = {
   dom: container,
   props: { children: [element] },
@@ -399,7 +400,7 @@ function commitRoot () {
 
 2. 如果类型不一样，而且新的节点存在，创建新节点替换老节点
 
-如果类型不一样，没有新节点，有老节点，删除老节点
+3. 如果类型不一样，没有新节点，有老节点，删除老节点
 
 #### reconcileChildren
 
@@ -590,7 +591,7 @@ function updateDom(dom, prevProps, nextProps) {
 完成了一系列对 dom 的操作，我们将新改变的 dom 渲染到页面，当 input 事件执行时，页面又会进行渲染，但此时会进入更新 fiber 树的逻辑，
 alternate 指向之前的 fiber 节点进行复用，更快的执行 Update 操作，如图：
 
-## ![Alt](https://upload-images.jianshu.io/upload_images/9369683-699b6c3475685cdd.png?imageMogr2/auto-orient/strip|imageView2/2/w/813/format/webp)
+![actionGif.gif](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/0b299a5b1f494b84874588013d12d6ca~tplv-k3u1fbpfcp-watermark.image)
 
 大功告成！
 
@@ -615,9 +616,9 @@ alternate 指向之前的 fiber 节点进行复用，更快的执行 Update 操�
 - react 合成事件 ✖
 - 还有很多没有实现 😤...
 
-至此，谢谢各位在百忙之中点开这篇文章，希望对你们能有所帮助，工作原因这篇文章大概断断续续写了有一个月，有时间我还会继续实现 react 的更多功能，如有问题欢迎各位大佬指正
+至此，谢谢各位在百忙之中点开这篇文章，希望对你们能有所帮助，如有问题欢迎各位大佬指正。工作原因这篇文章大概断断续续写了有一个月，工作上在忙一个基于 `腾讯云TRTC`+`websocket` 的小程序电话功能，有时间也会写成文章分享一下，当然 react 的实现文章也会继续
 
-- 👋：[跳转 github](https://github.com/blazer233/init-react/tree/main/miniReact)
+👋：[跳转 github](https://github.com/blazer233/init-react/tree/main/miniReact) 欢迎给个 star，谢谢大家了
 
 ### 参考文献
 
@@ -625,4 +626,6 @@ alternate 指向之前的 fiber 节点进行复用，更快的执行 Update 操�
 - 🍑：[build-your-own-react（强烈推荐）](https://pomb.us/build-your-own-react/)
 - 🍑：[手写 React 的 Fiber 架构，深入理解其原理](https://mp.weixin.qq.com/s/wGSUdQJxOiyPTRbrBBs1Zg)
 - 🍑：[手写一个简单的 React](https://jelly.jd.com/article/60aceb6b27393b0169c85231#)
-  求个 star，谢谢大家了
+- 🍑：[妙味课堂大圣老师 手写 react 的 fiber 和 hooks 架构](https://study.miaov.com/v_show/4227)
+- 🍑：[React Fiber 架构](https://zhuanlan.zhihu.com/p/37095662)
+- 🍑：[手写一个简单的 React](https://jelly.jd.com/article/60aceb6b27393b0169c85231#)

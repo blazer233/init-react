@@ -23,7 +23,7 @@ requestIdleCallback(workLoop);
  * 即没有可复用的元素，在 deadline 剩余时间还充裕时 nextUnitOfWork逐级互相交换，当 deadline
  * 的剩余时间小于1时，且元素深度便利结束后 跳出循环 进行渲染，当空闲时再次进行调度
  *
- * 所以fiber架构每一帧都会进行渲染操作，而老版的需要在整个树递归完之后再进行渲染操作
+ * 当没有下一个 工作单元时 进行渲染操作
  */
 function workLoop(deadline) {
   let shouldYield = false;
